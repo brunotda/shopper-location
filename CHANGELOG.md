@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- I18n Ar, Hu.
+
+### Fixed
+
+- I18n Fi.
+
 ## [1.3.1] - 2021-06-16
 
 ### Added
