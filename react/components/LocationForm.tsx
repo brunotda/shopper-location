@@ -55,6 +55,7 @@ const CSS_HANDLES = [
   'changeLocationSubmitContainer',
   'changeLocationSubmitButton',
   'changeLocationGeolocationButton',
+  'changeLocationError',
 ] as const
 
 const geolocationOptions = {
@@ -92,6 +93,7 @@ const getGeolocation = async (key: string, address: any) => {
           location: { lat, lng },
         },
       } = result
+
       geolocation = [lng, lat]
     }
   } catch (err) {
@@ -108,7 +110,6 @@ const getFulllocation = async (key: string, address: any) => {
 
   if (!query) return
   let results: any = []
-  let result: any = {}
 
   try {
     const response = await fetch(
@@ -122,7 +123,7 @@ const getFulllocation = async (key: string, address: any) => {
 
     return result
   } catch (err) {
-    return result
+    return err
   }
 }
 
@@ -143,10 +144,11 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   } = props
 
   const dispatch: any = useModalDispatch()
-  let { location } = useLocationState()
+  const { location } = useLocationState()
 
   const locationDispatch = useLocationDispatch()
   const [countryError, setCountryError] = useState(false)
+  const [addressError, setAddressError] = useState(false)
   const [geoError, setGeoError] = useState(false)
   const [locationLoading, setLocationLoading] = useState(false)
   const [geoLoading, setGeoLoading] = useState(false)
@@ -201,12 +203,15 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
     }
   }, [])
   const fieldsNotRequired = ['complement', 'receiverName', 'reference']
-  if (notRequired && notRequired.length) {
+
+  if (notRequired?.length) {
     notRequired.forEach((field: string) => {
       fieldsNotRequired.push(field)
     })
   }
-  let customRules = rules
+
+  const customRules = rules
+
   customRules.fields = customRules.fields
     .map((field: any) => {
       return {
@@ -223,9 +228,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
         required:
           fieldsNotRequired.indexOf(field.name) !== -1
             ? false
-            : field.hidden === true
-            ? false
-            : true,
+            : field.hidden !== true,
       }
     })
 
@@ -314,6 +317,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
 
     const fieldsWithValidation = addValidation(geolocatedAddress)
     const validatedFields = validateAddress(fieldsWithValidation, customRules)
+
     locationDispatch({
       type: 'SET_LOCATION',
       args: {
@@ -342,7 +346,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   }
 
   const updateRegionID = async () => {
-    const { country, postalCode } = removeValidation(location)
+    const { country } = removeValidation(location)
     const { salesChannel } = orderForm
 
     setRegionId({
@@ -356,7 +360,20 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
 
   const handleUpdateAddress = () => {
     setLocationLoading(true)
-    const newAddress = removeValidation(location)
+    let newAddress = removeValidation(location)
+
+    hideFields?.forEach((field: string) => {
+      if (field !== 'country') delete newAddress[field]
+    })
+
+    getFulllocation(googleMapsKey, newAddress).then((res: any) => {
+      const responseAddress = addValidation(
+        getParsedAddress(res, autofill),
+        customRules
+      )
+
+      newAddress = validateAddress(responseAddress, customRules)
+    })
 
     updateRegionID()
     updateAddress({
@@ -399,6 +416,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
       }, {})
 
     const address = addValidation(addressFields, customRules)
+
     locationDispatch({
       type: 'SET_LOCATION',
       args: {
@@ -410,6 +428,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   function handleCountryChange(newAddress: any) {
     const curAddress = location
     const combinedAddress = { ...curAddress, ...newAddress }
+
     resetAddressRules()
     locationDispatch({
       type: 'SET_LOCATION',
@@ -421,6 +440,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
 
   function handleAddressChange(newAddress: any) {
     clearTimeout(geoTimeout)
+    setLocationLoading(true)
     const curAddress = location
     const combinedAddress = { ...curAddress, ...newAddress }
     const validatedAddress = validateAddress(combinedAddress, customRules)
@@ -431,22 +451,43 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
         postalCode === 'first' &&
         autocomplete === true
       ) {
-        getFulllocation(googleMapsKey, validatedAddress).then((res: any) => {
-          const responseAddress = addValidation(
-            getParsedAddress(res, autofill),
-            customRules
-          )
-          const address = validateAddress(responseAddress, customRules)
+        getFulllocation(googleMapsKey, validatedAddress)
+          .then((res: any) => {
+            const responseAddress = addValidation(
+              getParsedAddress(res, autofill),
+              customRules
+            )
 
-          if (res && isMountedRef.current) {
-            locationDispatch({
-              type: 'SET_LOCATION',
-              args: {
-                address,
-              },
+            const address = validateAddress(responseAddress, customRules)
+
+            // eslint-disable-next-line vtex/prefer-early-return
+            if (res && isMountedRef.current) {
+              locationDispatch({
+                type: 'SET_LOCATION',
+                args: {
+                  address,
+                },
+              })
+              setAddressError(false)
+              setLocationLoading(false)
+            }
+          })
+          .catch(error => {
+            // eslint-disable-next-line no-console
+            console.log(error)
+            setAddressError(true)
+            handleCountryChange({
+              city: { value: '' },
+              state: { value: '' },
+              neighborhood: { value: '' },
+              street: { value: '' },
+              postalCode: { value: '' },
+              complement: { value: '' },
+              number: { value: '' },
+              referencia: { value: '' },
             })
-          }
-        })
+          })
+          .finally(() => setLocationLoading(false))
       } else {
         getGeolocation(googleMapsKey, validatedAddress).then((res: any) => {
           if (res?.length && isMountedRef.current) {
@@ -463,6 +504,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
             })
           }
         })
+        setLocationLoading(false)
       }
     }, 2500)
 
@@ -486,6 +528,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
 
     return shipsTo.map((code: string) => {
       const countryCode = countries[code as keyof typeof countries]
+
       return {
         label: countryCode ? intl.formatMessage(countryCode) : code,
         value: code,
@@ -499,6 +542,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
     if (!props.postalCode || props?.postalCode?.toLowerCase() !== 'first') {
       return b.name === 'postalCode' ? -1 : 1
     }
+
     return 0
   }
 
@@ -582,11 +626,18 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
                 !location || !isValidAddress(location, customRules).valid
               }
               onClick={() => handleUpdateAddress()}
-              class={handles.changeLocationSubmitButton}
+              className={handles.changeLocationSubmitButton}
               isLoading={locationLoading}
             >
               <FormattedMessage id="store/shopper-location.change-location.submit" />
             </Button>
+            {addressError ? (
+              <div className={`${handles.changeLocationError} c-danger`}>
+                <FormattedMessage id="store/shopper-location.change-location.ERROR_POSTAL_CODE" />
+              </div>
+            ) : (
+              ''
+            )}
           </section>
         </div>
         {!isMobile && (
