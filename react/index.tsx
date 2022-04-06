@@ -116,7 +116,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
         })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data?.orderForm, requestGoogleMapsApi, updateAddress]
+    [requestGoogleMapsApi, updateAddress]
   )
 
   const handleError = useCallback(() => {
@@ -175,7 +175,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
           })
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appSettingsData, data?.orderForm, requestGoogleMapsApi, updateAddress])
+  }, [appSettingsData, requestGoogleMapsApi, updateAddress])
 
   useEffect(() => {
     const handleLocationUpdated = () => refetch()
