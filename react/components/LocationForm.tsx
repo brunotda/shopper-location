@@ -346,7 +346,8 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   }
 
   const updateRegionID = async () => {
-    const { country } = removeValidation(location)
+    // eslint-disable-next-line no-shadow
+    const { country, postalCode } = removeValidation(location)
     const { salesChannel } = orderForm
 
     setRegionId({
