@@ -3,18 +3,14 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useQuery, useMutation } from 'react-apollo'
 import { injectIntl, WrappedComponentProps } from 'react-intl'
 import { ToastProvider } from 'vtex.styleguide'
-import { helpers } from 'vtex.address-form'
 
 import { getParsedAddress } from './helpers/getParsedAddress'
 import Address from './graphql/GetOrderForm.graphql'
 import Logistics from './graphql/Logistics.graphql'
-import { useLocationState } from './components/LocationContext'
 import UpdateOrderFormShipping from './graphql/UpdateOrderFormShipping.graphql'
 import AppSettings from './graphql/AppSettings.graphql'
 import RedirectToast from './components/RedirectToast'
 import SET_REGION_ID from './graphql/SetRegionId.graphql'
-
-const { removeValidation } = helpers
 
 const geolocationOptions = {
   enableHighAccuracy: true,
@@ -26,8 +22,6 @@ let propAutofill: any = null
 const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
   any> = (props: any) => {
   const { autofill, children } = props
-
-  const { location } = useLocationState()
 
   propAutofill = autofill
   const [updateAddress] = useMutation(UpdateOrderFormShipping)
@@ -66,14 +60,13 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
   )
 
   const updateRegionID = async () => {
-    const { country, postalCode: regionPostalCode } = removeValidation(location)
-    const { salesChannel } = data
+    const regionAddress = data.orderForm
 
     setRegionId({
       variables: {
-        country,
-        postalCode: regionPostalCode,
-        salesChannel,
+        country: regionAddress.shippingData.address.country,
+        postalCode: regionAddress.shippingData.address.postalCode,
+        salesChannel: regionAddress.salesChannel,
       },
     })
   }
@@ -160,6 +153,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
         })
           .catch(() => null)
           .then(() => {
+            updateRegionID()
             const event = new Event('locationUpdated')
 
             window.dispatchEvent(event)
