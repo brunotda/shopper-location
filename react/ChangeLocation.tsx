@@ -6,10 +6,11 @@ import {
   initialLocationState,
 } from './components/LocationContext'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ChangeLocation: FunctionComponent = (props: any) => {
   return (
     <LocationContextProvider {...initialLocationState}>
-      <ChangeLocationContainer {...props}/>
+      <ChangeLocationContainer {...props} />
     </LocationContextProvider>
   )
 }

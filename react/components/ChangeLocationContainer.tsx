@@ -12,8 +12,17 @@ import { useLocationState } from './LocationContext'
 
 const CSS_HANDLES = ['changeLocationContainer'] as const
 
-const ChangeLocation: StorefrontFunctionComponent<WrappedComponentProps & any> = (props) => {
-  const {intl, postalCode, autocomplete, autofill, notRequired, hideFields} = props
+const ChangeLocation: StorefrontFunctionComponent<WrappedComponentProps &
+  any> = props => {
+  const {
+    intl,
+    postalCode,
+    autocomplete,
+    autofill,
+    notRequired,
+    hideFields,
+  } = props
+
   const { loading, data } = useQuery(address, { ssr: false })
   const { data: logisticsData } = useQuery(Logistics, { ssr: false })
   const { location } = useLocationState()

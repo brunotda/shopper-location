@@ -16,10 +16,12 @@ const geolocationOptions = {
   maximumAge: 30000,
   timeout: 10000,
 }
+
 let propAutofill: any = null
 const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
   any> = (props: any) => {
   const { autofill, children } = props
+
   propAutofill = autofill
   const [updateAddress] = useMutation(UpdateOrderFormShipping)
   const { loading, data, refetch } = useQuery(Address, { ssr: false })
@@ -87,6 +89,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
           window.dispatchEvent(event)
         })
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data?.orderForm, requestGoogleMapsApi, updateAddress]
   )
 
@@ -138,6 +141,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
             window.dispatchEvent(event)
           })
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appSettingsData, data?.orderForm, requestGoogleMapsApi, updateAddress])
 
   useEffect(() => {
