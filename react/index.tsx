@@ -3,13 +3,18 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useQuery, useMutation } from 'react-apollo'
 import { injectIntl, WrappedComponentProps } from 'react-intl'
 import { ToastProvider } from 'vtex.styleguide'
+import { helpers } from 'vtex.address-form'
 
 import { getParsedAddress } from './helpers/getParsedAddress'
 import Address from './graphql/GetOrderForm.graphql'
 import Logistics from './graphql/Logistics.graphql'
+import { useLocationState } from './components/LocationContext'
 import UpdateOrderFormShipping from './graphql/UpdateOrderFormShipping.graphql'
 import AppSettings from './graphql/AppSettings.graphql'
 import RedirectToast from './components/RedirectToast'
+import SET_REGION_ID from './graphql/SetRegionId.graphql'
+
+const { removeValidation } = helpers
 
 const geolocationOptions = {
   enableHighAccuracy: true,
@@ -22,6 +27,8 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
   any> = (props: any) => {
   const { autofill, children } = props
 
+  const { location } = useLocationState()
+
   propAutofill = autofill
   const [updateAddress] = useMutation(UpdateOrderFormShipping)
   const { loading, data, refetch } = useQuery(Address, { ssr: false })
@@ -32,6 +39,8 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     },
     ssr: false,
   })
+
+  const [setRegionId] = useMutation(SET_REGION_ID)
 
   const [renderChildren, setRenderChildren] = useState(false)
 
@@ -55,6 +64,19 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     },
     [logisticsData?.logistics?.googleMapsKey]
   )
+
+  const updateRegionID = async () => {
+    const { country, postalCode: regionPostalCode } = removeValidation(location)
+    const { salesChannel } = data
+
+    setRegionId({
+      variables: {
+        country,
+        postalCode: regionPostalCode,
+        salesChannel,
+      },
+    })
+  }
 
   const handleSuccess = useCallback(
     async (position: any) => {
@@ -84,6 +106,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
       })
         .catch(() => null)
         .then(() => {
+          updateRegionID()
           const event = new Event('locationUpdated')
 
           window.dispatchEvent(event)
@@ -105,6 +128,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     )
       .then(res => res.json())
       .then(async res => {
+        // eslint-disable-next-line no-shadow
         const { location } = res
 
         if (!location.lat || !location.lng) return

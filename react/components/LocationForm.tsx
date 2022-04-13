@@ -334,6 +334,17 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
     clearTimeout(loadingTimeout)
   }
 
+  const handleGeolocation = () => {
+    loadingTimeout = setTimeout(() => {
+      setGeoLoading(true)
+    }, 500)
+    navigator.geolocation.getCurrentPosition(
+      handleSuccess,
+      handleError,
+      geolocationOptions
+    )
+  }
+
   const updateRegionID = async () => {
     const { country, postalCode: regionPostalCode } = removeValidation(location)
     const { salesChannel } = orderForm
@@ -345,19 +356,6 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
         salesChannel,
       },
     })
-  }
-
-  const handleGeolocation = () => {
-    loadingTimeout = setTimeout(() => {
-      setGeoLoading(true)
-    }, 500)
-    navigator.geolocation.getCurrentPosition(
-      handleSuccess,
-      handleError,
-      geolocationOptions
-    )
-
-    updateRegionID()
   }
 
   const handleUpdateAddress = () => {
