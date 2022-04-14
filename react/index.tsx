@@ -18,6 +18,11 @@ const geolocationOptions = {
   timeout: 10000,
 }
 
+interface AddressType {
+  postalCode?: string
+  country?: string
+}
+
 let propAutofill: any = null
 const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
   any> = (props: any) => {
@@ -59,13 +64,13 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     [logisticsData?.logistics?.googleMapsKey]
   )
 
-  const updateRegionID = async () => {
+  const updateRegionID = async (address: AddressType) => {
     const regionAddress = data.orderForm
 
     setRegionId({
       variables: {
-        country: regionAddress.shippingData.address.country,
-        postalCode: regionAddress.shippingData.address.postalCode,
+        country: address.country,
+        postalCode: address.postalCode,
         salesChannel: regionAddress.salesChannel,
       },
     })
@@ -92,6 +97,11 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
       addressFields.street = ''
       addressFields.isDisposable = true
 
+      const regionAddress = {
+        postalCode: addressFields.postalCode,
+        country: addressFields.country,
+      }
+
       await updateAddress({
         variables: {
           address: addressFields,
@@ -99,7 +109,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
       })
         .catch(() => null)
         .then(() => {
-          updateRegionID()
+          updateRegionID(regionAddress)
           const event = new Event('locationUpdated')
 
           window.dispatchEvent(event)
@@ -138,6 +148,11 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
           propAutofill
         )
 
+        const regionAddress = {
+          postalCode: addressFields.postalCode,
+          country: addressFields.country,
+        }
+
         addressFields.number = ''
         addressFields.street = ''
         // if (!shipsTo.includes(addressFields.country)) {
@@ -153,7 +168,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
         })
           .catch(() => null)
           .then(() => {
-            updateRegionID()
+            updateRegionID(regionAddress)
             const event = new Event('locationUpdated')
 
             window.dispatchEvent(event)
