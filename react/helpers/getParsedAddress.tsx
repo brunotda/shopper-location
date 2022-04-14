@@ -13,7 +13,7 @@ const getCountryISO3 = require('country-iso-2-to-3')
  */
 export const getParsedAddress = (place: any, autofill: any = null) => {
   const parsedAddressComponents = place.address_components.reduce(
-    (accumulator: any, address:any) => {
+    (accumulator: any, address: any) => {
       const parsedItem = address.types.reduce(
         (typeAccumulator: any, type: any) => ({
           ...typeAccumulator,
@@ -60,13 +60,22 @@ export const getParsedAddress = (place: any, autofill: any = null) => {
 
   const basicAddress: any = {
     addressType: fullAddress.addressType,
-    country: fullAddress.country, 
+    country: fullAddress.country,
     postalCode: fullAddress.postalCode,
     geoCoordinates: fullAddress.geoCoordinates,
     receiverName: fullAddress.receiverName,
   }
-  const validKeys = ["city", "country", "neighborhood", "number", "postalCode", "state", "street"]
-  
+
+  const validKeys = [
+    'city',
+    'country',
+    'neighborhood',
+    'number',
+    'postalCode',
+    'state',
+    'street',
+  ]
+
   if (autofill) {
     autofill.forEach((field: string) => {
       if (validKeys.indexOf(field) !== -1 && fullAddress[field]) {

@@ -10,16 +10,24 @@ import Logistics from './graphql/Logistics.graphql'
 import UpdateOrderFormShipping from './graphql/UpdateOrderFormShipping.graphql'
 import AppSettings from './graphql/AppSettings.graphql'
 import RedirectToast from './components/RedirectToast'
+import SET_REGION_ID from './graphql/SetRegionId.graphql'
 
 const geolocationOptions = {
   enableHighAccuracy: true,
   maximumAge: 30000,
   timeout: 10000,
 }
+
+interface AddressType {
+  postalCode?: string
+  country?: string
+}
+
 let propAutofill: any = null
 const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
   any> = (props: any) => {
   const { autofill, children } = props
+
   propAutofill = autofill
   const [updateAddress] = useMutation(UpdateOrderFormShipping)
   const { loading, data, refetch } = useQuery(Address, { ssr: false })
@@ -30,6 +38,8 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     },
     ssr: false,
   })
+
+  const [setRegionId] = useMutation(SET_REGION_ID)
 
   const [renderChildren, setRenderChildren] = useState(false)
 
@@ -54,6 +64,18 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     [logisticsData?.logistics?.googleMapsKey]
   )
 
+  const updateRegionID = async (address: AddressType) => {
+    const regionAddress = data.orderForm
+
+    setRegionId({
+      variables: {
+        country: address.country,
+        postalCode: address.postalCode,
+        salesChannel: regionAddress.salesChannel,
+      },
+    })
+  }
+
   const handleSuccess = useCallback(
     async (position: any) => {
       // call Google Maps API to get location details from returned coordinates
@@ -75,6 +97,11 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
       addressFields.street = ''
       addressFields.isDisposable = true
 
+      const regionAddress = {
+        postalCode: addressFields.postalCode,
+        country: addressFields.country,
+      }
+
       await updateAddress({
         variables: {
           address: addressFields,
@@ -82,11 +109,13 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
       })
         .catch(() => null)
         .then(() => {
+          updateRegionID(regionAddress)
           const event = new Event('locationUpdated')
 
           window.dispatchEvent(event)
         })
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data?.orderForm, requestGoogleMapsApi, updateAddress]
   )
 
@@ -102,6 +131,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     )
       .then(res => res.json())
       .then(async res => {
+        // eslint-disable-next-line no-shadow
         const { location } = res
 
         if (!location.lat || !location.lng) return
@@ -118,6 +148,11 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
           propAutofill
         )
 
+        const regionAddress = {
+          postalCode: addressFields.postalCode,
+          country: addressFields.country,
+        }
+
         addressFields.number = ''
         addressFields.street = ''
         // if (!shipsTo.includes(addressFields.country)) {
@@ -133,11 +168,13 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
         })
           .catch(() => null)
           .then(() => {
+            updateRegionID(regionAddress)
             const event = new Event('locationUpdated')
 
             window.dispatchEvent(event)
           })
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appSettingsData, data?.orderForm, requestGoogleMapsApi, updateAddress])
 
   useEffect(() => {

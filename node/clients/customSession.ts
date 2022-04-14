@@ -39,6 +39,7 @@ export default class CustomSession extends JanusClient {
 
     const data = { public: { regionId: { value } } }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.http.patch<any>('/api/sessions', data, config)
   }
 

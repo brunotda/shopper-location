@@ -346,13 +346,13 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   }
 
   const updateRegionID = async () => {
-    const { country } = removeValidation(location)
+    const { country, postalCode: regionPostalCode } = removeValidation(location)
     const { salesChannel } = orderForm
 
     setRegionId({
       variables: {
         country,
-        postalCode,
+        postalCode: regionPostalCode,
         salesChannel,
       },
     })
