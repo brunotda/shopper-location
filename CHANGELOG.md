@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Not setting "regionId" when no prior "regionId" is defined
+
 ## [1.4.5] - 2022-04-14
 
 ### Fixed
