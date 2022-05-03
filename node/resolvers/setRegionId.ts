@@ -6,6 +6,7 @@ export const setRegionId = async (
 ) => {
   const {
     clients: { customSession },
+    vtex: { logger },
     cookies,
   } = ctx
 
@@ -33,11 +34,15 @@ export const setRegionId = async (
     [{ id: updatedRegionId }],
   ] = await Promise.all([session, regionRequest])
 
-  if (!regionId || regionId.value === updatedRegionId) {
+  if (regionId?.value === updatedRegionId) {
     return { updated: false }
   }
 
-  await customSession.updateSession(updatedRegionId, sessionCookie)
+  await customSession
+    .updateSession(updatedRegionId, sessionCookie)
+    .catch(err => {
+      logger.error(err)
+    })
 
   return { updated: true }
 }
