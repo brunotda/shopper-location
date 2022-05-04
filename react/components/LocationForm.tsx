@@ -180,21 +180,18 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
     )
   }
 
-  if (location?.country?.value === '') {
-    location.country.value = culture.country
-  }
-
   useEffect(() => {
     isMountedRef.current = true
     currentAddress.receiverName = currentAddress.receiverName || { value: ' ' }
-    const addressWithValidation = addValidation(currentAddress)
+    const country = (location?.country?.value ?? culture.country) || ''
 
     if (isMountedRef.current) {
-      locationDispatch({
-        type: 'SET_LOCATION',
-        args: {
-          address: addressWithValidation,
-        },
+      handleCountryChange({
+        country: { value: country },
+        city: { value: '' },
+        state: { value: '' },
+        neighborhood: { value: '' },
+        postalCode: { value: '' },
       })
     }
 

@@ -64,17 +64,20 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     [logisticsData?.logistics?.googleMapsKey]
   )
 
-  const updateRegionID = async (address: AddressType) => {
-    const regionAddress = data.orderForm
+  const updateRegionID = useCallback(
+    async (address: AddressType) => {
+      const regionAddress = data?.orderForm
 
-    setRegionId({
-      variables: {
-        country: address.country,
-        postalCode: address.postalCode,
-        salesChannel: regionAddress.salesChannel,
-      },
-    })
-  }
+      setRegionId({
+        variables: {
+          country: address.country,
+          postalCode: address.postalCode,
+          salesChannel: regionAddress.salesChannel,
+        },
+      })
+    },
+    [data?.orderForm, setRegionId]
+  )
 
   const handleSuccess = useCallback(
     async (position: any) => {
@@ -115,8 +118,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
           window.dispatchEvent(event)
         })
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data?.orderForm, requestGoogleMapsApi, updateAddress]
+    [requestGoogleMapsApi, updateAddress, updateRegionID]
   )
 
   const handleError = useCallback(() => {
@@ -174,8 +176,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
             window.dispatchEvent(event)
           })
       })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appSettingsData, data?.orderForm, requestGoogleMapsApi, updateAddress])
+  }, [appSettingsData, requestGoogleMapsApi, updateAddress, updateRegionID])
 
   useEffect(() => {
     const handleLocationUpdated = () => refetch()
@@ -208,7 +209,7 @@ const AddressChallenge: StorefrontFunctionComponent<WrappedComponentProps &
     <ToastProvider positioning="window">
       {children}
       <RedirectToast
-        orderForm={data.orderForm}
+        orderForm={data?.orderForm}
         appSettings={appSettingsData?.appSettings}
       />
     </ToastProvider>

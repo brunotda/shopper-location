@@ -39,7 +39,7 @@ const ChangeLocation: StorefrontFunctionComponent<WrappedComponentProps &
     )
   if ((!loading && !data) || !logisticsData) return null
 
-  const { address: queriedAddress } = data.orderForm?.shippingData || {}
+  const { address: queriedAddress } = data?.orderForm?.shippingData || {}
 
   const currentAddress = {
     addressQuery: '',
@@ -61,14 +61,14 @@ const ChangeLocation: StorefrontFunctionComponent<WrappedComponentProps &
     <AddressRules
       country={
         (location.country?.value ??
-          data.orderForm?.shippingData?.address?.country) ||
+          data?.orderForm?.shippingData?.address?.country) ||
         logisticsData.logistics?.shipsTo[0]
       }
       shouldUseIOFetching
       useGeolocation={false}
     >
       <LocationForm
-        orderForm={data.orderForm || null}
+        orderForm={data?.orderForm || null}
         currentAddress={currentAddress}
         shipsTo={logisticsData.logistics?.shipsTo || []}
         googleMapsKey={logisticsData.logistics?.googleMapsKey || ''}
