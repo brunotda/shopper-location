@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+- Hidden field "Country" automatically selected if there is only one.
+
 ## [1.4.7] - 2022-05-04
 
 ### Fixed

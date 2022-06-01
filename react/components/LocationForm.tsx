@@ -183,7 +183,10 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   useEffect(() => {
     isMountedRef.current = true
     currentAddress.receiverName = currentAddress.receiverName || { value: ' ' }
-    const country = (location?.country?.value ?? culture.country) || ''
+    const country =
+      shipsTo.length !== 1
+        ? culture.country
+        : (location?.country?.value ?? culture.country) || ''
 
     if (isMountedRef.current) {
       handleCountryChange({
