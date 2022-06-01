@@ -42,6 +42,7 @@ interface AddressProps {
   postalCode?: string
   hideFields?: string[]
   notRequired?: string[]
+  showMap?: boolean
 }
 
 const CSS_HANDLES = [
@@ -141,6 +142,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
     postalCode,
     hideFields,
     notRequired,
+    showMap,
   } = props
 
   const dispatch: any = useModalDispatch()
@@ -637,7 +639,7 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
             )}
           </section>
         </div>
-        {!isMobile && (
+        {!isMobile && showMap && (
           <div
             className={`flex-grow-1 relative w-100 ${handles.changeLocationMapContainer}`}
           >

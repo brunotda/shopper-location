@@ -21,6 +21,7 @@ const ChangeLocation: StorefrontFunctionComponent<WrappedComponentProps &
     autofill,
     notRequired,
     hideFields,
+    showMap,
   } = props
 
   const { loading, data } = useQuery(address, { ssr: false })
@@ -78,6 +79,7 @@ const ChangeLocation: StorefrontFunctionComponent<WrappedComponentProps &
         hideFields={hideFields}
         notRequired={notRequired}
         autofill={autofill}
+        showMap={showMap}
       />
     </AddressRules>
   )

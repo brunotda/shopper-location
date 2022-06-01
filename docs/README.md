@@ -81,6 +81,7 @@ Shopper Location also supports redirecting a user to a URL based off their locat
 		"props":{
       "postalCode": "first",
 			"autocomplete": true,
+			"showMap": true,
       "notRequired": ["street", "number", "city", "state"],
       "hideFields": ["complement", "neighborhood", "receiverName", "reference"]
     }
@@ -136,6 +137,7 @@ Additionally, there is an `Automatic Redirect` option, that will redirect the us
 | `autocomplete` | `boolean` | Enables google autocomplete based on the postalCode (Only works when **postalCode** is set to `first`) | `false`       | `true`,`false`                                                                                               |
 | `notRequired`  | `array`   | Turn visible fields not required                    | `undefined`   | `["city", "country", "neighborhood", "number", "state", "street", "complement","receiverName", "reference"]` |
 | `hideFields`   | `array`   | Hide fields and turn them not required              | `undefined`   | `["city", "country", "neighborhood", "number", "state", "street", "complement","receiverName", "reference"]` |
+| `showMap`   | `boolean`   | Enable preview embed google maps            | `false`   | `true`,`false`  |
 
 ## Customization
 

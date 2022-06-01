@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added 
+
+- `showMap` can be set on the `change-location` interface
+
 ## [1.4.7] - 2022-05-04
 
 ### Fixed
