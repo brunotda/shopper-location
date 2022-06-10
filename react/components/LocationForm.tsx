@@ -3,7 +3,6 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react'
 import { useMutation } from 'react-apollo'
 import { WrappedComponentProps, FormattedMessage } from 'react-intl'
-import { useRuntime } from 'vtex.render-runtime'
 import { useModalDispatch } from 'vtex.modal-layout/ModalContext'
 import { CountrySelector, helpers, inputs } from 'vtex.address-form'
 import { Button, ButtonWithIcon, IconLocation } from 'vtex.styleguide'
@@ -155,7 +154,6 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   const isMountedRef = useRef(false)
   const handles = useCssHandles(CSS_HANDLES)
   const { isMobile } = useDevice()
-  const { culture } = useRuntime()
 
   const [
     updateAddress,
@@ -183,15 +181,15 @@ const LocationForm: FunctionComponent<WrappedComponentProps &
   useEffect(() => {
     isMountedRef.current = true
     currentAddress.receiverName = currentAddress.receiverName || { value: ' ' }
-    const country = (location?.country?.value ?? culture.country) || ''
+
+    const addressWithValidation = addValidation(currentAddress)
 
     if (isMountedRef.current) {
-      handleCountryChange({
-        country: { value: country },
-        city: { value: '' },
-        state: { value: '' },
-        neighborhood: { value: '' },
-        postalCode: { value: '' },
+      locationDispatch({
+        type: 'SET_LOCATION',
+        args: {
+          address: addressWithValidation,
+        },
       })
     }
 
